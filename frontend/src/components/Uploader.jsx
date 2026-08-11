@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { UploadCloud, CheckCircle, AlertTriangle, Image as ImageIcon, X } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertTriangle, Image as ImageIcon, X, Trash2 } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 
 export default function Uploader() {
@@ -13,6 +13,7 @@ export default function Uploader() {
   
   const addTable = useGameStore((state) => state.addTable);
   const tables = useGameStore((state) => state.tables);
+  const clearAllTables = useGameStore((state) => state.clearAllTables);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -164,7 +165,17 @@ export default function Uploader() {
 
       {/* Tables Preview Section */}
       <div className="p-6 bg-slate-800 rounded-xl shadow-xl border border-slate-700">
-        <h3 className="text-xl font-semibold mb-4 text-slate-300">Tablas Extraídas ({tables.length})</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold text-slate-300">Tablas Extraídas ({tables.length})</h3>
+          {tables.length > 0 && (
+            <button
+              onClick={clearAllTables}
+              className="flex items-center px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors text-sm font-medium border border-red-500/20"
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Eliminar Todas
+            </button>
+          )}
+        </div>
         
         {tables.length === 0 ? (
           <p className="text-slate-500 text-sm italic">No hay tablas cargadas aún.</p>
