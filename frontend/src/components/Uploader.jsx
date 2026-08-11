@@ -9,6 +9,7 @@ export default function Uploader() {
   const [statusMsg, setStatusMsg] = useState('');
   const [error, setError] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [showConfirmClear, setShowConfirmClear] = useState(false);
   const fileInputRef = useRef(null);
   
   const addTable = useGameStore((state) => state.addTable);
@@ -169,7 +170,7 @@ export default function Uploader() {
           <h3 className="text-xl font-semibold text-slate-300">Tablas Extraídas ({tables.length})</h3>
           {tables.length > 0 && (
             <button
-              onClick={clearAllTables}
+              onClick={() => setShowConfirmClear(true)}
               className="flex items-center px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors text-sm font-medium border border-red-500/20"
             >
               <Trash2 className="w-4 h-4 mr-2" /> Eliminar Todas
@@ -245,6 +246,35 @@ export default function Uploader() {
             </div>
             <div className="flex-1 overflow-auto bg-slate-950 rounded-lg flex items-center justify-center border border-slate-800">
               <img src={previewImage} alt="Original Bingo Card" className="max-w-full max-h-[70vh] object-contain" />
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Confirmation Modal for Clearing Tables */}
+      {showConfirmClear && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-md w-full shadow-2xl text-center">
+            <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">¿Eliminar todas las tablas?</h3>
+            <p className="text-slate-400 mb-6">
+              Esta acción no se puede deshacer. Perderás todos los cartones extraídos actualmente.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowConfirmClear(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  clearAllTables();
+                  setShowConfirmClear(false);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold transition-colors shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+              >
+                Sí, eliminar todas
+              </button>
             </div>
           </div>
         </div>
