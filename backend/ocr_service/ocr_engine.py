@@ -5,8 +5,15 @@ import uuid
 import fitz  # PyMuPDF
 import base64
 
-# Initialize EasyOCR Reader once (only used for image files, not PDFs)
-reader = easyocr.Reader(['en'], gpu=False)
+# EasyOCR Reader will be lazy-loaded to save memory
+_reader = None
+
+def get_reader():
+    global _reader
+    if _reader is None:
+        import easyocr
+        _reader = easyocr.Reader(['en'], gpu=False)
+    return _reader
 
 
 class BingoCardExtractor:
@@ -366,9 +373,9 @@ class BingoCardExtractor:
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         enhanced = clahe.apply(gray)
 
-        results = reader.readtext(enhanced, allowlist='0123456789')
+        results = get_reader().readtext(enhanced, allowlist='0123456789')
         if len(results) < 20:
-            results2 = reader.readtext(enhanced)
+            results2 = get_reader().readtext(enhanced)
             seen = set()
             for r in results:
                 cx = int((r[0][0][0] + r[0][2][0]) / 2)
