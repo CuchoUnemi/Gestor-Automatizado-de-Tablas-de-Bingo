@@ -8,7 +8,7 @@ export const useGameStore = create(
       // State
       tables: [], // Array of table objects: { card_id, serial_number, matrix }
       calledNumbers: [], // Array of numbers called in the current round
-      gameMode: 'tabla_llena', // Active game mode
+      gameModes: ['tabla_llena'], // Array of active game modes
       winningTables: [], // Array of card_ids that have won and are currently displaying
       acknowledgedWinners: [], // Array of card_ids that won but have been dismissed to continue playing
 
@@ -20,7 +20,20 @@ export const useGameStore = create(
         return { tables: [...state.tables, tableData] };
       }),
 
-      setGameMode: (mode) => set({ gameMode: mode, acknowledgedWinners: [] }),
+      setGameMode: (mode) => set({ gameModes: [mode], acknowledgedWinners: [] }),
+      toggleGameMode: (mode) => set((state) => {
+        let current = state.gameModes || [];
+        if (typeof current === 'string') current = [current]; // Legacy state handling
+        
+        let newModes;
+        if (current.includes(mode)) {
+          newModes = current.filter(m => m !== mode);
+          if (newModes.length === 0) newModes = ['tabla_llena']; // Prevent having zero modes
+        } else {
+          newModes = [...current, mode];
+        }
+        return { gameModes: newModes, acknowledgedWinners: [] };
+      }),
 
       callNumber: (num) => set((state) => {
         if (state.calledNumbers.includes(num)) return state;
