@@ -51,14 +51,20 @@ export default function AnnouncerPanel() {
       return;
     }
 
-    const winners = tables.filter(t => currentModes.some(m => checkWin(t.matrix, calledNumbers, m)));
+    let newWinKeys = [];
+    tables.forEach(t => {
+      currentModes.forEach(m => {
+        if (checkWin(t.matrix, calledNumbers, m)) {
+          const key = `${t.card_id}:${m}`;
+          if (!acknowledgedWinners.includes(key)) {
+            newWinKeys.push(key);
+          }
+        }
+      });
+    });
     
-    // Ignore winners that have already been acknowledged by the announcer
-    const unacknowledgedWinners = winners.filter(w => !acknowledgedWinners.includes(w.card_id));
-    const winnerIds = unacknowledgedWinners.map(w => w.card_id);
-    
-    if (JSON.stringify(winnerIds) !== JSON.stringify(winningTables)) {
-      setWinningTables(winnerIds);
+    if (JSON.stringify(newWinKeys) !== JSON.stringify(winningTables)) {
+      setWinningTables(newWinKeys);
     }
   }, [calledNumbers, currentModes, tables, acknowledgedWinners, winningTables, setWinningTables]);
 
@@ -67,8 +73,20 @@ export default function AnnouncerPanel() {
     if (calledNumbers.length === 0 || tables.length === 0) return [];
     if (winningTables.length > 0) return [];
     
-    const activeTables = tables.filter(t => !acknowledgedWinners.includes(t.card_id));
-    return activeTables.filter(t => currentModes.some(m => checkNearWin(t.matrix, calledNumbers, m)));
+    let near = [];
+    tables.forEach(t => {
+      let isNear = false;
+      for (const m of currentModes) {
+        const key = `${t.card_id}:${m}`;
+        if (!acknowledgedWinners.includes(key)) {
+           if (checkNearWin(t.matrix, calledNumbers, m)) {
+             isNear = true;
+           }
+        }
+      }
+      if (isNear) near.push(t);
+    });
+    return near;
   }, [calledNumbers, currentModes, tables, winningTables, acknowledgedWinners]);
 
   const handleSubmit = (e) => {
@@ -191,8 +209,17 @@ export default function AnnouncerPanel() {
             </button>
             
             <div className="flex flex-col gap-6">
-              {tables.filter(t => winningTables.includes(t.card_id)).map(t => (
-                <div key={t.card_id} className="bg-slate-900/80 rounded-xl p-4 flex flex-col md:flex-row gap-6 border border-emerald-500/50">
+              {tables.filter(t => winningTables.some(wk => wk.startsWith(`${t.card_id}:`))).map(t => {
+                const wonModes = winningTables
+                   .filter(wk => wk.startsWith(`${t.card_id}:`))
+                   .map(wk => wk.split(':')[1])
+                   .map(modeId => GAME_MODES.find(g => g.id === modeId)?.label || modeId);
+
+                return (
+                <div key={t.card_id} className="bg-slate-900/80 rounded-xl p-4 flex flex-col md:flex-row gap-6 border border-emerald-500/50 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-emerald-500 text-emerald-900 font-bold text-xs px-3 py-1 rounded-bl-lg z-10 uppercase">
+                    ¡GANADOR: {wonModes.join(' Y ')}!
+                  </div>
                   {/* Digital Board */}
                   <div className="flex-1">
                     <h4 className="text-center font-bold text-emerald-400 mb-2 font-mono text-lg">{t.serial_number}</h4>
