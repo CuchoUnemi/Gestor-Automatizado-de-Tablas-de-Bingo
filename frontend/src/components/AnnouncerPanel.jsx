@@ -255,7 +255,8 @@ export default function AnnouncerPanel() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
