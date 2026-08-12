@@ -42,11 +42,21 @@ export const checkWin = (matrix, calledNumbers, mode) => {
       return checkLine(esquinas);
 
     case 'cuadro_grande':
+    case 'cuadrado':
       for (let c = 0; c < 5; c++) {
         if (!isMarked(matrix[0][c]) || !isMarked(matrix[4][c])) return false;
       }
       for (let r = 1; r < 4; r++) {
         if (!isMarked(matrix[r][0]) || !isMarked(matrix[r][4])) return false;
+      }
+      return true;
+
+    case 'cruz':
+      for (let c = 0; c < 5; c++) {
+        if (!isMarked(matrix[2][c])) return false;
+      }
+      for (let r = 0; r < 5; r++) {
+        if (!isMarked(matrix[r][2])) return false;
       }
       return true;
 
@@ -111,6 +121,7 @@ export const checkNearWin = (matrix, calledNumbers, mode) => {
       return isOneAway(esquinas);
 
     case 'cuadro_grande':
+    case 'cuadrado':
       let p_unmarked = 0;
       for (let c = 0; c < 5; c++) {
         if (!isMarked(matrix[0][c])) p_unmarked++;
@@ -121,6 +132,16 @@ export const checkNearWin = (matrix, calledNumbers, mode) => {
         if (!isMarked(matrix[r][4])) p_unmarked++;
       }
       return p_unmarked === 1;
+
+    case 'cruz':
+      let cruz_unmarked = 0;
+      for (let c = 0; c < 5; c++) {
+        if (!isMarked(matrix[2][c])) cruz_unmarked++;
+      }
+      for (let r = 0; r < 5; r++) {
+        if (r !== 2 && !isMarked(matrix[r][2])) cruz_unmarked++;
+      }
+      return cruz_unmarked === 1;
 
     default:
       return false;

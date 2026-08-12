@@ -10,7 +10,8 @@ const GAME_MODES = [
   { id: 'diagonal', label: 'Diagonal' },
   { id: 'letra_x', label: 'Letra X' },
   { id: 'cuatro_esquinas', label: '4 Esquinas' },
-  { id: 'cuadro_grande', label: 'Cuadro Grande' },
+  { id: 'cruz', label: 'Cruz' },
+  { id: 'cuadrado', label: 'Cuadrado' },
 ];
 
 export default function AnnouncerPanel() {
