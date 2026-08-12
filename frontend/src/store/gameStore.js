@@ -27,8 +27,9 @@ export const useGameStore = create(
         
         let newModes;
         if (current.includes(mode)) {
+          // If it's the only one selected, do not allow deselecting it.
+          if (current.length === 1) return state;
           newModes = current.filter(m => m !== mode);
-          if (newModes.length === 0) newModes = ['tabla_llena']; // Prevent having zero modes
         } else {
           newModes = [...current, mode];
         }
