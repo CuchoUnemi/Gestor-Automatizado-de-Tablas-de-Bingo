@@ -16,6 +16,7 @@ const GAME_MODES = [
 
 export default function AnnouncerPanel() {
   const [inputValue, setInputValue] = useState('');
+  const [showResetModal, setShowResetModal] = useState(false);
   const inputRef = useRef(null);
 
   const {
@@ -126,19 +127,13 @@ export default function AnnouncerPanel() {
             />
           </form>
 
-          <div className="flex justify-between mt-6">
+          <div className="flex justify-center mt-6">
             <button 
               onClick={undoLastNumber}
               disabled={calledNumbers.length === 0}
-              className="flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors disabled:opacity-50 font-semibold"
             >
-              <Undo2 className="w-4 h-4 mr-2" /> Deshacer
-            </button>
-            <button 
-              onClick={resetRound}
-              className="flex items-center px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" /> Reiniciar
+              <Undo2 className="w-5 h-5 mr-2" /> Deshacer Último Número
             </button>
           </div>
         </div>
@@ -223,7 +218,16 @@ export default function AnnouncerPanel() {
         )}
 
         <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl min-h-[300px]">
-          <h3 className="text-lg font-bold text-slate-300 mb-4 border-b border-slate-700 pb-2">Números Cantados ({calledNumbers.length})</h3>
+          <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+            <h3 className="text-lg font-bold text-slate-300">Números Cantados ({calledNumbers.length})</h3>
+            <button 
+              onClick={() => setShowResetModal(true)}
+              disabled={calledNumbers.length === 0}
+              className="flex items-center px-3 py-1.5 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg transition-all disabled:opacity-50 font-semibold"
+            >
+              <RefreshCw className="w-4 h-4 mr-1.5" /> Reiniciar Juego
+            </button>
+          </div>
           
           <div className="flex flex-wrap gap-3">
             {calledNumbers.map((num, i) => (
@@ -242,6 +246,41 @@ export default function AnnouncerPanel() {
         </div>
       </div>
 
+      </div>
+
+      {/* Modal de Confirmación para Reiniciar */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-white mb-3 flex items-center">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
+                <RefreshCw className="w-5 h-5 text-red-400" />
+              </div>
+              ¿Reiniciar el juego?
+            </h3>
+            <p className="text-slate-300 mb-8 pl-1">
+              Esta acción borrará <strong className="text-white">todos los números cantados</strong> y limpiará las alertas de ganadores. Las tablas de los jugadores se mantendrán registradas.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors font-semibold"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  resetRound();
+                  setShowResetModal(false);
+                }}
+                className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all font-bold shadow-lg shadow-red-500/30 active:scale-95"
+              >
+                Sí, reiniciar juego
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
