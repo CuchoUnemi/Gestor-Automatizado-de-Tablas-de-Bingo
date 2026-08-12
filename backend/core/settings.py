@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-z=z#cf)83#@0ypmnn*qq#7-j*6$0xdq=k@l=z4t6-zw%tzc4*b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gestor-automatizado-de-tablas-de-bingo.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
