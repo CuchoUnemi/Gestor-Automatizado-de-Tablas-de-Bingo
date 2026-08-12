@@ -308,9 +308,6 @@ export default function AnnouncerPanel() {
           </div>
         </div>
       </div>
-
-      </div>
-
       {/* Modal de Confirmación para Reiniciar */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
