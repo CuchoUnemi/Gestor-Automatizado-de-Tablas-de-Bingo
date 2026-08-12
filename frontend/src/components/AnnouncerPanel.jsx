@@ -95,7 +95,7 @@ export default function AnnouncerPanel() {
             Configuración
           </h3>
           <select 
-            className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-slate-200 outline-none focus:border-indigo-500"
+            className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-slate-200 outline-none focus:border-indigo-500 mb-4"
             value={gameMode}
             onChange={(e) => setGameMode(e.target.value)}
           >
@@ -103,9 +103,38 @@ export default function AnnouncerPanel() {
               <option key={m.id} value={m.id}>{m.label}</option>
             ))}
           </select>
+
+          {/* Pattern Preview */}
+          <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 flex justify-center mb-2">
+            <div className="grid grid-cols-5 gap-1">
+              {Array.from({ length: 25 }).map((_, i) => {
+                const r = Math.floor(i / 5);
+                const c = i % 5;
+                let isTarget = false;
+                if (r === 2 && c === 2) isTarget = true; // Comodin
+                else {
+                  switch (gameMode) {
+                    case 'tabla_llena': isTarget = true; break;
+                    case 'linea_horizontal': isTarget = (r === 2); break;
+                    case 'linea_vertical': isTarget = (c === 2); break;
+                    case 'diagonal': isTarget = (r === c || r + c === 4); break;
+                    case 'letra_x': isTarget = (r === c || r + c === 4); break;
+                    case 'cuatro_esquinas': isTarget = ((r===0||r===4) && (c===0||c===4)); break;
+                    case 'cruz': isTarget = (r === 2 || c === 2); break;
+                    case 'cuadrado':
+                    case 'cuadro_grande': isTarget = (r === 0 || r === 4 || c === 0 || c === 4); break;
+                  }
+                }
+                return (
+                  <div key={i} className={`w-4 h-4 rounded-full ${isTarget ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]' : 'bg-slate-700'}`}></div>
+                );
+              })}
+            </div>
+          </div>
+
           {hasWon && (
-            <p className="text-xs text-emerald-400 mt-2 font-semibold animate-pulse">
-              ↑ Cambia el modo de juego aquí para continuar con esta misma ronda.
+            <p className="text-xs text-emerald-400 mt-2 font-semibold animate-pulse text-center">
+              ↑ Cambia el modo para continuar la ronda.
             </p>
           )}
         </div>
@@ -199,20 +228,54 @@ export default function AnnouncerPanel() {
 
         {/* Near Winners Alert */}
         {!hasWon && nearWinners.length > 0 && (
-          <div className="bg-yellow-500/10 border border-yellow-500/50 p-4 rounded-xl flex items-start">
-            <BellRing className="w-6 h-6 text-yellow-500 mr-3 mt-1 animate-pulse" />
-            <div>
-              <h4 className="text-yellow-400 font-bold mb-1">¡Tensión al máximo!</h4>
-              <p className="text-yellow-200/80 text-sm">
-                Las siguientes tablas están a <strong className="text-white">1 número</strong> de ganar:
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {nearWinners.map(t => (
-                  <span key={t.card_id} className="text-xs font-mono bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">
-                    {t.serial_number}
-                  </span>
-                ))}
-              </div>
+          <div className="bg-yellow-500/10 border-2 border-yellow-500/50 p-6 rounded-xl shadow-[0_0_30px_rgba(234,179,8,0.2)]">
+            <h4 className="text-xl text-yellow-400 font-bold mb-4 flex items-center justify-center">
+              <BellRing className="w-8 h-8 mr-3 animate-bounce text-yellow-500" />
+              ¡Tensión al máximo! (A 1 número de ganar)
+            </h4>
+            
+            <div className="flex flex-col gap-6">
+              {nearWinners.map(t => (
+                <div key={t.card_id} className="bg-slate-900/80 rounded-xl p-4 flex flex-col md:flex-row gap-6 border border-yellow-500/50 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-yellow-500 text-yellow-900 font-bold text-xs px-3 py-1 rounded-bl-lg z-10 animate-pulse">
+                    ¡FALTA 1!
+                  </div>
+                  {/* Digital Board for Near Winner */}
+                  <div className="flex-1">
+                    <h4 className="text-center font-bold text-yellow-400 mb-2 font-mono text-lg">{t.serial_number}</h4>
+                    <div className="grid grid-cols-5 gap-1 max-w-[250px] mx-auto">
+                      {['B', 'I', 'N', 'G', 'O'].map((letter, i) => (
+                        <div key={i} className="text-center font-bold text-slate-400 text-xs py-1 border-b border-slate-700">{letter}</div>
+                      ))}
+                      {t.matrix.map((row, rIdx) => 
+                        row.map((cell, cIdx) => {
+                          const isCalled = cell === 'COMODIN' || calledNumbers.includes(cell);
+                          return (
+                            <div 
+                              key={`${rIdx}-${cIdx}`} 
+                              className={`aspect-square flex flex-col items-center justify-center text-sm font-semibold rounded relative
+                                ${isCalled ? 'bg-yellow-600 text-white shadow-inner' : 'bg-slate-800 text-slate-400'}`}
+                            >
+                              <span className={isCalled ? 'mb-1' : ''}>{cell === 'COMODIN' ? '★' : cell}</span>
+                              {isCalled && cell !== 'COMODIN' && (
+                                <div className="absolute w-2 h-2 bg-white rounded-full bottom-1 shadow-sm"></div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Original Image Preview for Near Winner */}
+                  {t.image_base64 && (
+                    <div className="flex-1 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-slate-700/50 pt-4 md:pt-0 md:pl-4">
+                      <h4 className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Imagen Original</h4>
+                      <img src={t.image_base64} alt="Original Bingo Card" className="max-w-full h-auto max-h-[250px] object-contain rounded border border-slate-700/50 shadow-md opacity-80" />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
